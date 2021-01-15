@@ -10,7 +10,7 @@ exports.saveAnswer = async (req, res) => {
 
   const newAnswerCreated = await newAnswer.save();
   if (newAnswerCreated) {
-    resAnswer = await Answer.find({ _id: newAnswerCreated._id }).populate(
+    const resAnswer = await Answer.find({ _id: newAnswerCreated._id }).populate(
       "writer"
     );
     res.send(resAnswer);

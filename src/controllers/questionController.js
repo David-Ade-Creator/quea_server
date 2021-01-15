@@ -17,7 +17,7 @@ exports.saveQuestionController = async (req, res) => {
   });
   const newQuestionCreated = await newQuestion.save();
   if (newQuestionCreated) {
-    resQuestion = await Question.find({ _id: newQuestionCreated._id }).populate("whoasked");
+    const resQuestion = await Question.find({ _id: newQuestionCreated._id }).populate("whoasked");
     res.send(resQuestion);
   } else {
     res.status(404).send("Unable to save question");
