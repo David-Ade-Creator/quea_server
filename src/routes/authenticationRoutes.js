@@ -1,18 +1,13 @@
 const express = require('express')
-const router = express.Router()
+const router = express.Router();
 
-// Load Controllers
 const {
    createAccountController,
    signinAccountController,
    sendResetPasswordLinkController,
    resetPasswordController,
    googleLoginController,
-  // getSingleUserController,
    facebookLoginController,
-   readUserProfileController,
-   updateUserProfileController,
-   profilePhotoController,
    activateAccountController,
 } = require("../controllers/authController.js");
 
@@ -36,12 +31,6 @@ router.put("/resetPassword", resetPasswordValidator, resetPasswordController);
 
 router.post("/googleLogin", googleLoginController);
 
-//router.get("/user/:id", readUserProfileController);
-
 router.post("/facebookLogin", facebookLoginController);
-
-//router.put("/user/:id/updateprofile", updateUserProfileController);
-
-//router.put("/user/:id/profilephoto", profilePhotoController);
 
 module.exports = router;

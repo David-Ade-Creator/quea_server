@@ -22,11 +22,15 @@ exports.readUserProfileController = async (req, res) => {
     const profile = await User.findById(req.params.id);
     if (profile) {
       profile.info = {
+        photo : req.body.photo,
         education: req.body.education,
         country: req.body.country,
         state: req.body.state,
         address: req.body.address,
+        description : req.body.description,
       };
+      profile.firstname = req.body.firstname;
+      profile.lastname = req.body.lastname;
     }
     profile.save((err, info) => {
       if (info) {

@@ -4,10 +4,8 @@ const { OAuth2Client } = require("google-auth-library");
 const fetch = require("node-fetch");
 const jwt = require("jsonwebtoken");
 const { errorHandler } = require("../helpers/dbErrorHandling");
-const sgMail = require("@sendgrid/mail");
+const { transporter } = require("../util");
 const { validationResult } = require("express-validator");
-const { generateConfirmationToken, generateAccessToken } = require("../util");
-sgMail.setApiKey(config.MAIL_KEY);
 
 exports.createAccountController = async (req, res) => {
   const { firstname, lastname, email, password } = req.body;
@@ -48,18 +46,18 @@ exports.createAccountController = async (req, res) => {
                     <p>${config.CLIENT_URL}</p>
                  `,
     };
-    sgMail
-      .send(emailData)
-      .then((sent) => {
+
+    transporter.sendMail(emailData, function (error, info) {
+      if (error) {
+        return res.json({
+          errors: "Unable to send confirmation email",
+        });
+      } else {
         return res.json({
           message: `Confirmation mail has been sent to ${email}.`,
         });
-      })
-      .catch((error) => {
-        return res.json({
-          errors: "here",
-        });
-      });
+      }
+    });
   }
 };
 
@@ -192,18 +190,18 @@ exports.sendResetPasswordLinkController = async (req, res) => {
                   "Database connection error on user password forgot request",
               });
             }
-            sgMail
-              .send(emailData)
-              .then((sent) => {
+
+            transporter.sendMail(emailData, function (error, info) {
+              if (error) {
+                return res.json({
+                  errors: "Unable to send reset email",
+                });
+              } else {
                 return res.json({
                   message: `Email has been sent to ${email}. Follow the instruction to activate your account`,
                 });
-              })
-              .catch((error) => {
-                return res.json({
-                  message: error.message,
-                });
-              });
+              }
+            });
           }
         );
       }
@@ -371,4 +369,3 @@ exports.facebookLoginController = async (req, res) => {
       })
   );
 };
-

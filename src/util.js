@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const config = require("./config.js");
+const nodemailer = require('nodemailer');
 
 exports.generateAccessToken =  
 	async (id) => {
@@ -28,3 +29,11 @@ exports.generateResetToken =
 			console.log(e);
 		}
 	};
+
+	exports.transporter = nodemailer.createTransport({
+		service: 'gmail',
+		auth: {
+		  user: config.EMAIL_FROM,
+		  pass: config.EMAIL_PASSWORD
+		}
+	  });
