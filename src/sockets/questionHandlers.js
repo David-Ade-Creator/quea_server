@@ -1,8 +1,9 @@
-const Question = require("./models/questionModel");
+const Question = require("../models/questionModel");
 
-export default (io,socket) => {
-    const getQuestions = () => {
-        const questions = await Question.find({}).populate("whoasked");
+export default (io,socket,connect) => {
+  socket.on("question list output", () => {
+    connect.then(async (db) => {
+      const questions = await Question.find({}).populate("whoasked");
       if (questions) {
         return io.emit("Output Questionlist", questions);
       } else {
@@ -10,7 +11,33 @@ export default (io,socket) => {
           message: "Questions Not Found.",
         });
       }
-    }
+    });
+  });
+  socket.on("questions", (question) => {
+    connect.then((db) => {
+      try {
+        const newQuestion = new Question({
+          question: question.question,
+          link: question.link,
+          whoasked: question.whoasked,
+        });
 
-    socket.on("question:get", getQuestions);
+        newQuestion.save((err, doc) => {
+          if (err)
+            return res.json({
+              success: false,
+              err,
+            });
+
+          Question.find({})
+            .populate("whoasked")
+            .exec((err, doc) => {
+              return io.emit("Output Questionlist", doc);
+            });
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    });
+  });
 }
