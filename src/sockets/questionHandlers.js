@@ -1,7 +1,7 @@
 const Question = require("../models/questionModel");
 
 export default (io,socket,connect) => {
-  socket.on("question list output", () => {
+  socket.on("question list output", (req,res) => {
     connect.then(async (db) => {
       const questions = await Question.find({}).populate("whoasked");
       if (questions) {
@@ -13,7 +13,7 @@ export default (io,socket,connect) => {
       }
     });
   });
-  socket.on("questions", (question) => {
+  socket.on("questions", (question,res) => {
     connect.then((db) => {
       try {
         const newQuestion = new Question({

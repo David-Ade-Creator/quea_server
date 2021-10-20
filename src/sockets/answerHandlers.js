@@ -1,7 +1,7 @@
 const Answer = require("../models/answerModel");
 
 export default (io,socket,connect) => {
-  socket.on("saveAnswer", (answer) => {
+  socket.on("saveAnswer", (answer,res) => {
     connect.then((db) => {
       const questionId = answer.questionId;
       try {
@@ -37,7 +37,7 @@ export default (io,socket,connect) => {
       }
     });
   });
-  socket.on("answer list output", () => {
+  socket.on("answer list output", (req,res) => {
     connect.then(async (db) => {
       const answers = await Answer.find({}).populate(["writer", "questionId"]);
       if (answers) {
@@ -49,7 +49,7 @@ export default (io,socket,connect) => {
       }
     });
   });
-  socket.on("answer like", (data) => {
+  socket.on("answer like", (data,res) => {
     connect.then(async (db) => {
       const { answerId, wholiked } = data;
       const answer = await Answer.findById(answerId);
@@ -65,7 +65,7 @@ export default (io,socket,connect) => {
       }
     });
   });
-  socket.on("answer unlike", (data) => {
+  socket.on("answer unlike", (data,res) => {
     connect.then(async (db) => {
       const { answerId, wholiked } = data;
       const answer = await Answer.findById(answerId);
@@ -81,7 +81,7 @@ export default (io,socket,connect) => {
       }
     });
   });
-  socket.on("questionAnswers", (questionId) => {
+  socket.on("questionAnswers", (questionId,res) => {
     connect.then(async (db) => {
       const answers = await Answer.find({
         questionId: questionId,
