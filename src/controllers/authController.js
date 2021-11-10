@@ -7,6 +7,61 @@ const { errorHandler } = require("../helpers/dbErrorHandling");
 const { transporter } = require("../util");
 const { validationResult } = require("express-validator");
 
+// exports.createAccountController = async (req, res) => {
+//   const { firstname, lastname, email, password } = req.body;
+//   const errors = validationResult(req);
+//   if (!errors.isEmpty()) {
+//     const firstError = errors.array().map((error) => error.msg)[0];
+//     return res.status(422).json({
+//       errors: firstError,
+//     });
+//   } else {
+//     User.findOne({
+//       email,
+//     }).exec((err, doc) => {
+//       if (doc) {
+//         return res.status(400).json({
+//           errors: "Email is taken",
+//         });
+//       }
+//     });
+
+//     const token = jwt.sign(
+//       { firstname, lastname, email, password },
+//       config.CONFIRMATION_TOKEN_SECRET,
+//       {
+//         expiresIn: "1d",
+//       }
+//     );
+//     const emailData = {
+//       from: config.EMAIL_FROM,
+//       to: email,
+//       subject: `Account activation link`,
+//       html: `
+//                     <h1>Please confirm you email</h1>
+//                     <p>Please click on this link <a href="${config.CLIENT_URL}/users/activateaccount/${token}">Activate Your Account</a> to 
+//                     confirm you email address and activate your account</p>
+//                     <hr />
+//                     <p>This email may contain sensetive information</p>
+//                     <p>${config.CLIENT_URL}</p>
+//                  `,
+//     };
+
+//     transporter.sendMail(emailData, function (error, info) {
+//       if (error) {
+//         return res.json({
+//           errors: "Unable to send confirmation email",
+//         });
+//       } else {
+//         return res.json({
+//           message: `Confirmation mail has been sent to ${email}.`,
+//         });
+//       }
+//     });
+//   }
+// };
+
+
 exports.createAccountController = async (req, res) => {
   const { firstname, lastname, email, password } = req.body;
   const errors = validationResult(req);
@@ -26,35 +81,21 @@ exports.createAccountController = async (req, res) => {
       }
     });
 
-    const token = jwt.sign(
-      { firstname, lastname, email, password },
-      config.CONFIRMATION_TOKEN_SECRET,
-      {
-        expiresIn: "1d",
-      }
-    );
-    const emailData = {
-      from: config.EMAIL_FROM,
-      to: email,
-      subject: `Account activation link`,
-      html: `
-                    <h1>Please confirm you email</h1>
-                    <p>Please click on this link <a href="${config.CLIENT_URL}/users/activateaccount/${token}">Activate Your Account</a> to 
-                    confirm you email address and activate your account</p>
-                    <hr />
-                    <p>This email may contain sensetive information</p>
-                    <p>${config.CLIENT_URL}</p>
-                 `,
-    };
-
-    transporter.sendMail(emailData, function (error, info) {
-      if (error) {
-        return res.json({
-          errors: "Unable to send confirmation email",
+    const newUser = new User({
+      firstname,
+      lastname,
+      email,
+      password,
+    });
+    newUser.save((err, user) => {
+      if (err) {
+        return res.status(401).json({
+          errors: errorHandler(err),
         });
       } else {
         return res.json({
-          message: `Confirmation mail has been sent to ${email}.`,
+          message:
+            "Your account has been successfully Created, Login to continue.",
         });
       }
     });
