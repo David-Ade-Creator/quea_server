@@ -1,7 +1,7 @@
 const Answer = require("../models/answerModel");
 
-export default (io,socket,connect) => {
-  socket.on("saveAnswer", (answer,res) => {
+export default (io, socket, connect) => {
+  socket.on("saveAnswer", (answer, res) => {
     connect.then((db) => {
       const questionId = answer.questionId;
       try {
@@ -18,16 +18,16 @@ export default (io,socket,connect) => {
               err,
             });
 
-            Answer.find({
-              questionId: questionId,
-            })
-              .populate("writer")
-              .exec((err, doc) => {
-                return io.emit("savedAnswerList", doc);
-              });
+          Answer.find({
+            questionId: questionId,
+          }).sort({"createdAt": -1}) 
+            .populate(["writer", "questionId"])
+            .exec((err, doc) => {
+              return io.emit("savedAnswerList", doc);
+            });
 
-          Answer.find({})
-            .populate("writer")
+          Answer.find({}).sort({"createdAt": -1}) 
+            .populate(["writer", "questionId"])
             .exec((err, doc) => {
               return io.emit("Output Answerlist", doc);
             });
@@ -37,9 +37,9 @@ export default (io,socket,connect) => {
       }
     });
   });
-  socket.on("answer list output", (req,res) => {
+  socket.on("answer list output", (req, res) => {
     connect.then(async (db) => {
-      const answers = await Answer.find({}).populate(["writer", "questionId"]);
+      const answers = await Answer.find({}).sort({"createdAt": -1}).populate(["writer", "questionId"]);
       if (answers) {
         return io.emit("Output Answerlist", answers);
       } else {
@@ -49,43 +49,43 @@ export default (io,socket,connect) => {
       }
     });
   });
-  socket.on("answer like", (data,res) => {
+  socket.on("answer like", (data, res) => {
     connect.then(async (db) => {
       const { answerId, wholiked } = data;
       const answer = await Answer.findById(answerId);
-      answer.likes.push(wholiked);
-      const likedAnswer = await answer.save();
-      if (likedAnswer) {
-        const newAnswer = await Answer.find().populate([
-          "writer",
-          "questionId",
-          "wholiked"
-        ]);
-        return io.emit("Output like", newAnswer);
+      const liked = answer.likes.find(like => like._id = wholiked);
+      if (liked) {
+        answer.likes.splice(answer.likes.findIndex(like => like._id === wholiked), 1);
+        const unLikedAnswer = await answer.save();
+        if (unLikedAnswer) {
+          const newAnswer = await Answer.find().sort({"createdAt": -1}).populate([
+            "writer",
+            "questionId",
+            "wholiked"
+          ]);
+          return io.emit("Output Answerlist", newAnswer);
+        }
+      } else {
+        answer.likes.push(wholiked);
+        const likedAnswer = await answer.save();
+        if (likedAnswer) {
+          const newAnswer = await Answer.find().sort({"createdAt": -1}).populate([
+            "writer",
+            "questionId",
+            "wholiked"
+          ]);
+          return io.emit("Output Answerlist", newAnswer);
+        }
       }
+
     });
   });
-  socket.on("answer unlike", (data,res) => {
-    connect.then(async (db) => {
-      const { answerId, wholiked } = data;
-      const answer = await Answer.findById(answerId);
-      answer.likes.splice(answer.likes.findIndex( like => like._id === wholiked) , 1);
-      const unLikedAnswer = await answer.save();
-      if (unLikedAnswer) {
-        const newAnswer = await Answer.find().populate([
-          "writer",
-          "questionId",
-          "wholiked"
-        ]);
-        return io.emit("Output unlike", newAnswer);
-      }
-    });
-  });
-  socket.on("questionAnswers", (questionId,res) => {
+
+  socket.on("questionAnswers", (questionId, res) => {
     connect.then(async (db) => {
       const answers = await Answer.find({
         questionId: questionId,
-      }).populate(["writer", "questionId"]);
+      }).sort({"createdAt": -1}).populate(["writer", "questionId"]);
       if (answers) {
         return io.emit("questionAnswerList", answers);
       } else {

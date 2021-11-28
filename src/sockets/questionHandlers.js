@@ -3,7 +3,7 @@ const Question = require("../models/questionModel");
 export default (io,socket,connect) => {
   socket.on("question list output", (req,res) => {
     connect.then(async (db) => {
-      const questions = await Question.find({}).populate("whoasked");
+      const questions = await Question.find({}).sort({"createdAt": -1}).populate("whoasked");
       if (questions) {
         return io.emit("Output Questionlist", questions);
       } else {
@@ -29,7 +29,7 @@ export default (io,socket,connect) => {
               err,
             });
 
-          Question.find({})
+          Question.find({}).sort({"createdAt": -1})
             .populate("whoasked")
             .exec((err, doc) => {
               return io.emit("Output Questionlist", doc);
