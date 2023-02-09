@@ -1,6 +1,6 @@
 const Answer = require("../models/answerModel");
 
-export default (io, socket, connect) => {
+module.exports = (io, socket, connect) => {
   socket.on("saveAnswer", (answer, res) => {
     connect.then((db) => {
       const questionId = answer.questionId;

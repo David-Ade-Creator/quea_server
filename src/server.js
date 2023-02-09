@@ -7,16 +7,12 @@ const questionRoute = require("./routes/questionRoutes");
 const answerRoute = require("./routes/answerRoutes");
 const uploadRoute = require("./routes/uploadRoutes");
 const userRoute = require("./routes/userRoutes");
-const { default: questionHandlers } = require("./sockets/questionHandlers.js");
-const { default: answerHandlers } = require("./sockets/answerHandlers.js");
+const questions = require("./sockets/questionHandlers.js");
+const answerHandlers = require("./sockets/answerHandlers.js");
 
 const app = express();
 const server = require("http").createServer(app);
-const io = require("socket.io")(server, {
-  cors: {
-    origin: '*',
-  }
-});
+const io = require("socket.io")(server, {cors: {origin: '*', }});
 
 const mongodbUrl = config.MONGODB_URL;
 
@@ -42,7 +38,7 @@ app.use("/api/q3/", userRoute);
 
 
 const onConnection = (socket) => {
-  questionHandlers(io, socket,connect);
+  questions(io, socket,connect);
   answerHandlers(io, socket,connect);
 }
 

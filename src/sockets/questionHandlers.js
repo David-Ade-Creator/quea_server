@@ -1,6 +1,6 @@
 const Question = require("../models/questionModel");
 
-export default (io,socket,connect) => {
+module.exports = (io,socket,connect) => {
   socket.on("question list output", (req,res) => {
     connect.then(async (db) => {
       const questions = await Question.find({}).sort({"createdAt": -1}).populate("whoasked");
